@@ -5,6 +5,7 @@ import os
 import time
 
 import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.datasets import load_iris, load_wine
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -99,3 +100,29 @@ for nome_base, base in BASES.items():
         plt.savefig(f"figuras/cm_{nome_base.lower()}_{nome_modelo.lower()}.png",
                     dpi=150)
         plt.show()
+
+# --------------------------------------------------------------
+# 4. Tabela comparativa
+# --------------------------------------------------------------
+df = pd.DataFrame(resultados)
+pd.set_option("display.float_format", "{:.4f}".format)
+print("\n", df.to_string(index=False))
+df.to_csv("resultados.csv", index=False)
+
+# --------------------------------------------------------------
+# 5. Gráfico comparativo das métricas
+# --------------------------------------------------------------
+metricas = ["Acurácia", "Precisão", "Revocação"]
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+for ax, nome_base in zip(axes, BASES):
+    (df[df["Base"] == nome_base]
+        .set_index("Modelo")[metricas].T
+        .plot.bar(ax=ax, rot=0))
+    ax.set_title(nome_base)
+    ax.set_ylim(0.8, 1.01)
+    ax.set_ylabel("Valor")
+    ax.grid(axis="y", alpha=0.3)
+fig.suptitle("KNN (TP01) x MLPClassifier (TP03)")
+plt.tight_layout()
+plt.savefig("figuras/comparacao_metricas.png", dpi=150)
+plt.show()
