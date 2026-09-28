@@ -2,9 +2,16 @@
 # TP03 - MLPClassifier (Iris e Wine) + comparação com KNN (TP01)
 # ==============================================================
 import os
+import time
 
 from sklearn.datasets import load_iris, load_wine
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import make_pipeline
@@ -46,6 +53,8 @@ def criar_modelos():
 # --------------------------------------------------------------
 # 3. Treino, avaliação e matriz de confusão
 # --------------------------------------------------------------
+resultados = []
+
 for nome_base, base in BASES.items():
     X, y = base.data, base.target
     X_train, X_test, y_train, y_test = train_test_split(
@@ -53,3 +62,29 @@ for nome_base, base in BASES.items():
     )
     print(f"\n{'=' * 60}\nBase: {nome_base}  "
           f"(treino={len(X_train)}, teste={len(X_test)})\n{'=' * 60}")
+
+    for nome_modelo, modelo in criar_modelos().items():
+        inicio = time.perf_counter()
+        modelo.fit(X_train, y_train)
+        tempo = time.perf_counter() - inicio
+
+        y_pred = modelo.predict(X_test)
+        acc = accuracy_score(y_test, y_pred)
+        prec = precision_score(y_test, y_pred, average="macro")
+        rec = recall_score(y_test, y_pred, average="macro")
+        cv = cross_val_score(criar_modelos()[nome_modelo], X, y, cv=5)
+
+        print(f"\n--- {nome_modelo} ---")
+        print(classification_report(y_test, y_pred,
+                                    target_names=base.target_names, digits=4))
+
+        resultados.append({
+            "Base": nome_base,
+            "Modelo": nome_modelo,
+            "Acurácia": acc,
+            "Precisão": prec,
+            "Revocação": rec,
+            "CV acc (média)": cv.mean(),
+            "CV acc (desvio)": cv.std(),
+            "Tempo treino (s)": tempo,
+        })
