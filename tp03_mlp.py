@@ -4,8 +4,10 @@
 import os
 import time
 
+import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris, load_wine
 from sklearn.metrics import (
+    ConfusionMatrixDisplay,
     accuracy_score,
     classification_report,
     precision_score,
@@ -88,3 +90,12 @@ for nome_base, base in BASES.items():
             "CV acc (desvio)": cv.std(),
             "Tempo treino (s)": tempo,
         })
+
+        disp = ConfusionMatrixDisplay.from_predictions(
+            y_test, y_pred, display_labels=base.target_names, cmap="Blues"
+        )
+        disp.ax_.set_title(f"Matriz de Confusão - {nome_modelo} - {nome_base}")
+        plt.tight_layout()
+        plt.savefig(f"figuras/cm_{nome_base.lower()}_{nome_modelo.lower()}.png",
+                    dpi=150)
+        plt.show()
