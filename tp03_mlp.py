@@ -4,6 +4,9 @@
 import os
 
 from sklearn.datasets import load_iris, load_wine
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 RANDOM_STATE = 42
 TEST_SIZE = 0.3
@@ -14,3 +17,15 @@ os.makedirs("figuras", exist_ok=True)
 # 1. Bases
 # --------------------------------------------------------------
 BASES = {"Iris": load_iris(), "Wine": load_wine()}
+
+
+# --------------------------------------------------------------
+# 2. Modelos (scaler dentro do pipeline -> sem data leakage)
+# --------------------------------------------------------------
+def criar_modelos():
+    return {
+        "KNN": make_pipeline(
+            StandardScaler(),
+            KNeighborsClassifier(n_neighbors=K_KNN),
+        ),
+    }
